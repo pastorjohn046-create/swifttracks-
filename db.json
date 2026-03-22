@@ -1,0 +1,74 @@
+{
+  "users": [
+    {
+      "uid": "b7bpfliwt0t",
+      "email": "pastorjohn046@gmail.com",
+      "password": "$2b$10$9FtAfCc2uXlgPgcH2wCOi.UgFSvMigOb3wFudjR7pCsF1SgCWN7T6",
+      "role": "admin",
+      "createdAt": "2026-03-21T22:10:01.868Z"
+    }
+  ],
+  "shipments": [
+    {
+      "id": "SHP001",
+      "trackingNumber": "SWIFT-123456",
+      "senderName": "John Smith",
+      "senderEmail": "john@example.com",
+      "senderPhone": "+1 234 567 890",
+      "senderAddress": "123 Main St, New York, NY",
+      "receiverName": "Jane Doe",
+      "receiverEmail": "jane@example.com",
+      "receiverPhone": "+1 987 654 321",
+      "receiverAddress": "456 Elm St, London, UK",
+      "origin": "New York, USA",
+      "destination": "London, UK",
+      "status": "In Transit",
+      "currentLocation": "London Heathrow Airport",
+      "weight": "2.5kg",
+      "dimensions": "30x20x15cm",
+      "serviceType": "Express",
+      "estimatedDelivery": "2026-03-25",
+      "updates": [
+        {
+          "status": "Picked Up",
+          "location": "New York, USA",
+          "timestamp": "2026-03-20T10:00:00Z",
+          "description": "Shipment picked up from sender"
+        },
+        {
+          "status": "In Transit",
+          "location": "JFK International Airport",
+          "timestamp": "2026-03-21T08:00:00Z",
+          "description": "Shipment departed from origin airport"
+        }
+      ],
+      "createdAt": "2026-03-20T10:00:00Z"
+    }
+  ],
+  "flights": [
+    {
+      "id": "FLT001",
+      "flightNumber": "SW-101",
+      "origin": "New York (JFK)",
+      "destination": "London (LHR)",
+      "departureTime": "2026-03-21T08:00:00Z",
+      "arrivalTime": "2026-03-21T20:00:00Z",
+      "status": "In Flight",
+      "aircraft": "Boeing 777-300ER",
+      "capacity": "45,000kg",
+      "currentLoad": "32,400kg"
+    }
+  ],
+  "supportTickets": [
+    {
+      "id": "TKT001",
+      "trackingNumber": "SWIFT-123456",
+      "subject": "Delayed Shipment",
+      "message": "My shipment is delayed. Can you help?",
+      "status": "Open",
+      "priority": "High",
+      "createdAt": "2026-03-21T10:00:00Z"
+    }
+  ],
+  "reviews": []
+}
