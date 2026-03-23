@@ -308,6 +308,12 @@ async function startServer() {
     if (!db.shipments[index].updates) db.shipments[index].updates = [];
     const newUpdate = { ...req.body, id: Math.random().toString(36).substring(2, 15) };
     db.shipments[index].updates.push(newUpdate);
+    
+    // Also update the main shipment status
+    if (req.body.status) {
+      db.shipments[index].status = req.body.status;
+    }
+    
     saveDb(db);
     res.json(newUpdate);
   });
@@ -424,18 +430,26 @@ async function startServer() {
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+  try {
+    if (process.env.NODE_ENV !== 'production') {
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    } else {
+      const distPath = path.join(process.cwd(), 'dist');
+      if (fs.existsSync(distPath)) {
+        app.use(express.static(distPath));
+        app.get('*', (req, res) => {
+          res.sendFile(path.join(distPath, 'index.html'));
+        });
+      } else {
+        console.warn('Dist folder not found. API routes are still active.');
+      }
+    }
+  } catch (err) {
+    console.error('Error initializing Vite/Static middleware:', err);
   }
 
   app.listen(PORT, '0.0.0.0', async () => {
