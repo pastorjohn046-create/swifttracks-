@@ -68,10 +68,12 @@ async function startServer() {
 
   // API Routes
   app.post('/api/auth/signup', async (req, res) => {
+    console.log('Signup request received:', { email: req.body?.email, name: req.body?.name });
     const { email, password, name, role } = req.body;
     const db = getDb();
     
     if (db.users.find((u: any) => u.email === email)) {
+      console.log('Signup failed: User already exists', email);
       return res.status(400).json({ error: 'User already exists' });
     }
 
@@ -93,15 +95,18 @@ async function startServer() {
     res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'none' });
     
     const { password: _, ...userWithoutPassword } = newUser;
+    console.log('Signup successful:', email);
     res.json(userWithoutPassword);
   });
 
   app.post('/api/auth/login', async (req, res) => {
+    console.log('Login request received:', { email: req.body?.email });
     const { email, password } = req.body;
     const db = getDb();
     const user = db.users.find((u: any) => u.email === email);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
+      console.log('Login failed: Invalid credentials', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -109,6 +114,7 @@ async function startServer() {
     res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'none' });
     
     const { password: _, ...userWithoutPassword } = user;
+    console.log('Login successful:', email);
     res.json(userWithoutPassword);
   });
 
@@ -429,6 +435,12 @@ async function startServer() {
     res.json(db.reviews[index === -1 ? db.reviews.length - 1 : index]);
   });
 
+  // Catch-all for unmatched API routes
+  app.all('/api/*', (req, res) => {
+    console.log('Unmatched API request:', req.method, req.url);
+    res.status(404).json({ error: 'API route not found', method: req.method, url: req.url });
+  });
+
   // Vite middleware for development
   try {
     if (process.env.NODE_ENV !== 'production') {
@@ -451,6 +463,12 @@ async function startServer() {
   } catch (err) {
     console.error('Error initializing Vite/Static middleware:', err);
   }
+
+  // Global Error Handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Unhandled Server Error:', err);
+    res.status(500).json({ error: 'Internal Server Error', message: err.message });
+  });
 
   app.listen(PORT, '0.0.0.0', async () => {
     // Ensure default admin exists

@@ -13,9 +13,17 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+      
+      const contentType = res.headers.get('content-type');
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Signup failed');
+        if (contentType && contentType.includes('application/json')) {
+          const err = await res.json();
+          throw new Error(err.error || 'Signup failed');
+        } else {
+          const text = await res.text();
+          console.error('Non-JSON error response during signup:', text);
+          throw new Error(`Server error (${res.status}): ${res.statusText}`);
+        }
       }
       return res.json();
     },
@@ -25,9 +33,17 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+      
+      const contentType = res.headers.get('content-type');
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Login failed');
+        if (contentType && contentType.includes('application/json')) {
+          const err = await res.json();
+          throw new Error(err.error || 'Login failed');
+        } else {
+          const text = await res.text();
+          console.error('Non-JSON error response during login:', text);
+          throw new Error(`Server error (${res.status}): ${res.statusText}`);
+        }
       }
       return res.json();
     },
