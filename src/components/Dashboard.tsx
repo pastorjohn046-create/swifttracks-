@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Shipment, UserProfile } from '../types';
-import { Package, Search, User, Mail, Calendar, Shield, Hash, Plus, CheckCircle2, AlertCircle, MapPin } from 'lucide-react';
+import { Package, Search, User, Mail, Calendar, Shield, Hash, Plus, CheckCircle2, AlertCircle, MapPin, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface DashboardProps {
@@ -34,8 +34,8 @@ export default function Dashboard({ profile }: DashboardProps) {
 
     fetchShipments();
     
-    // Poll for updates every 30 seconds since we don't have real-time sockets yet
-    const interval = setInterval(fetchShipments, 30000);
+    // Poll for updates every 15 seconds since we don't have real-time sockets yet
+    const interval = setInterval(fetchShipments, 15000);
     return () => clearInterval(interval);
   }, [profile]);
 
@@ -99,9 +99,32 @@ export default function Dashboard({ profile }: DashboardProps) {
 
   return (
     <div className="flex flex-col gap-8 sm:gap-12 animate-fade-in py-4 sm:py-8">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-text">Dashboard</h2>
-        <p className="text-xs sm:text-sm font-medium text-muted">Your account overview and shipment details</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-text">Dashboard</h2>
+          <p className="text-xs sm:text-sm font-medium text-muted">Your account overview and shipment details</p>
+        </div>
+        <button 
+          onClick={() => {
+            setLoading(true);
+            const fetchShipments = async () => {
+              try {
+                const data = await api.shipments.list();
+                const filtered = data.filter(s => s.senderId === profile?.uid || s.receiverEmail === profile?.email);
+                setShipments(filtered);
+              } catch (error) {
+                console.error('Error fetching shipments:', error);
+              } finally {
+                setLoading(false);
+              }
+            };
+            fetchShipments();
+          }}
+          className="btn-secondary !py-2 !px-4 !text-[10px] flex items-center gap-2"
+        >
+          <Activity className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+          REFRESH_DATA
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">

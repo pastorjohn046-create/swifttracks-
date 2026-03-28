@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Shipment, ShipmentStatus, TrackingUpdate, Flight, FlightStatus, SupportTicket, Review } from '../types';
-import { Search, Edit2, Plus, ArrowRight, Loader2, MapPin, Info, Plane, MessageSquare, Package, CheckCircle, XCircle, Star, FileText, Printer, X, Clock, Trash2 } from 'lucide-react';
+import { Search, Edit2, Plus, ArrowRight, Loader2, MapPin, Info, Plane, MessageSquare, Package, CheckCircle, XCircle, Star, FileText, Printer, X, Clock, Trash2, Activity, History } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion } from 'motion/react';
 import Logo from './Logo';
 
-type AdminTab = 'shipments' | 'flights' | 'cs' | 'reviews' | 'receipts' | 'users';
+import Globe from './Globe';
+
+type AdminTab = 'overview' | 'shipments' | 'flights' | 'cs' | 'reviews' | 'receipts' | 'users';
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<AdminTab>('shipments');
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
@@ -319,7 +322,7 @@ export default function AdminPanel() {
           <p className="text-sm font-medium text-muted">Manage shipments, flights, and customer support</p>
         </div>
         <div className="flex gap-1 p-1 bg-bg rounded-xl w-full sm:w-fit overflow-x-auto scrollbar-hide">
-          {(['shipments', 'flights', 'cs', 'reviews', 'receipts', 'users'] as AdminTab[]).map(tab => (
+          {(['overview', 'shipments', 'flights', 'cs', 'reviews', 'receipts', 'users'] as AdminTab[]).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -334,6 +337,128 @@ export default function AdminPanel() {
           ))}
         </div>
       </div>
+
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 flex flex-col gap-8">
+            <div className="card-modern p-1 bg-white overflow-hidden relative min-h-[600px] flex items-center justify-center">
+              <div className="absolute top-8 left-8 z-20">
+                <span className="section-label mb-2">Live Global Operations</span>
+                <h3 className="heading-display text-5xl">Real-time Network</h3>
+              </div>
+              <div className="absolute bottom-8 right-8 z-20 flex flex-col gap-2 text-right">
+                <span className="text-micro text-accent">Active Flights: {flights.filter(f => f.status === 'departed').length}</span>
+                <span className="text-micro text-primary">In Transit: {shipments.filter(s => s.status !== 'delivered' && s.status !== 'cancelled').length}</span>
+              </div>
+              <Globe />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-1 bg-border border border-border">
+              <div className="bg-white p-8 flex flex-col gap-2">
+                <span className="text-micro text-muted">Total Shipments</span>
+                <span className="text-4xl font-black tracking-tight">{shipments.length}</span>
+                <div className="flex items-center gap-2 text-emerald-600 text-[10px] font-bold">
+                  <ArrowRight className="w-3 h-3 -rotate-45" /> +12% this week
+                </div>
+              </div>
+              <div className="bg-white p-8 flex flex-col gap-2">
+                <span className="text-micro text-muted">Active Flights</span>
+                <span className="text-4xl font-black tracking-tight">{flights.length}</span>
+                <div className="flex items-center gap-2 text-amber-600 text-[10px] font-bold">
+                  <Clock className="w-3 h-3" /> 4 delayed
+                </div>
+              </div>
+              <div className="bg-white p-8 flex flex-col gap-2">
+                <span className="text-micro text-muted">Support Tickets</span>
+                <span className="text-4xl font-black tracking-tight">{tickets.filter(t => t.status === 'open').length}</span>
+                <div className="flex items-center gap-2 text-rose-600 text-[10px] font-bold">
+                  <Info className="w-3 h-3" /> Urgent action required
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 flex flex-col gap-1 bg-border border border-border">
+            <div className="bg-white p-10 flex flex-col gap-8">
+              <div className="flex justify-between items-center">
+                <h4 className="text-micro font-bold uppercase tracking-widest flex items-center gap-2 opacity-50">
+                  <History className="w-3 h-3" /> RECENT_ACTIVITY_LOG
+                </h4>
+                <button className="text-[10px] font-bold text-primary hover:underline uppercase tracking-widest">Full_Log</button>
+              </div>
+              <div className="flex flex-col gap-6">
+                {shipments.slice(0, 5).map(shipment => (
+                  <div key={shipment.id} className="flex gap-6 items-start group">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 group-hover:scale-150 transition-transform" />
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-black tracking-tight text-text uppercase">Shipment {shipment.trackingNumber} updated</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-micro font-mono text-muted">{format(new Date(shipment.createdAt), 'HH:mm:ss')}</span>
+                        <span className="text-micro font-bold text-primary uppercase tracking-widest px-1.5 py-0.5 bg-bg border border-border">
+                          {shipment.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-primary text-white p-10 flex flex-col gap-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
+                <Activity className="w-24 h-24" />
+              </div>
+              <h4 className="text-micro font-bold uppercase tracking-widest flex items-center gap-2 opacity-70">
+                <Activity className="w-3 h-3" /> SYSTEM_HEALTH_METRICS
+              </h4>
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between text-micro font-bold uppercase tracking-widest opacity-70">
+                    <span>Server_Load</span>
+                    <span className="text-accent">24.08%</span>
+                  </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-accent"
+                      initial={{ width: 0 }}
+                      animate={{ width: '24%' }}
+                      transition={{ duration: 1 }}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between text-micro font-bold uppercase tracking-widest opacity-70">
+                    <span>Database_Sync</span>
+                    <span className="text-emerald-400">99.99%</span>
+                  </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-emerald-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 1, delay: 0.2 }}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between text-micro font-bold uppercase tracking-widest opacity-70">
+                    <span>API_Latency</span>
+                    <span className="text-amber-400">124ms</span>
+                  </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-amber-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: '60%' }}
+                      transition={{ duration: 1, delay: 0.4 }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeTab === 'shipments' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -357,99 +482,93 @@ export default function AdminPanel() {
               </button>
             </div>
 
-            <div className="card-modern overflow-hidden bg-white">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-bg/50 border-b border-border">
-                      <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Tracking #</th>
-                      <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Receiver</th>
-                      <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Status</th>
-                      <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Date</th>
-                      <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredShipments.map((shipment) => (
-                      <tr key={shipment.id} className="hover:bg-bg/30 transition-colors group">
-                        <td className="p-4 font-mono font-bold text-primary">{shipment.trackingNumber}</td>
-                        <td className="p-4 font-bold text-text">{shipment.receiverName}</td>
-                        <td className="p-4">
-                          <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
-                            shipment.status === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 
-                            shipment.status === 'cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
-                          }`}>
-                            {shipment.status}
-                          </span>
-                        </td>
-                        <td className="p-4 text-sm text-muted font-medium">
-                          {format(new Date(shipment.createdAt), 'MMM dd, yyyy')}
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <button 
-                              onClick={() => setShowReceipt(shipment)}
-                              className="p-2 hover:bg-bg rounded-lg text-muted hover:text-primary transition-all"
-                              title="View Receipt"
-                            >
-                              <FileText className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setEditingShipment(shipment);
-                                setShipmentData({
-                                  trackingNumber: shipment.trackingNumber,
-                                  senderName: shipment.senderName || '',
-                                  senderEmail: shipment.senderEmail || '',
-                                  senderPhone: shipment.senderPhone || '',
-                                  senderAddress: shipment.senderAddress || '',
-                                  receiverName: shipment.receiverName || '',
-                                  receiverEmail: shipment.receiverEmail || '',
-                                  receiverPhone: shipment.receiverPhone || '',
-                                  receiverAddress: shipment.receiverAddress || '',
-                                  origin: shipment.origin || '',
-                                  destination: shipment.destination || '',
-                                  status: shipment.status,
-                                  weight: shipment.weight ? shipment.weight.toString() : '',
-                                  dimensions: shipment.dimensions || '',
-                                  serviceType: shipment.serviceType || 'Express',
-                                  estimatedDelivery: shipment.estimatedDelivery || '',
-                                  packageImage: shipment.packageImage || ''
-                                });
-                                setShowShipmentForm(true);
-                              }}
-                              className="p-2 hover:bg-bg rounded-lg text-muted hover:text-primary transition-all"
-                              title="Edit Details"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setConfirmDeleteId(shipment.id);
-                                setConfirmDeleteType('shipment');
-                              }}
-                              className="p-2 hover:bg-rose-50 rounded-lg text-muted hover:text-rose-600 transition-all"
-                              title="Delete Shipment"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => {
-                                setSelectedShipment(shipment);
-                                setNewStatus(shipment.status);
-                                setUpdateImage(shipment.packageImage || '');
-                              }}
-                              className="p-2 hover:bg-bg rounded-lg text-muted hover:text-primary transition-all"
-                              title="Post Update"
-                            >
-                              <Clock className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="card-modern bg-white overflow-hidden">
+              <div className="hidden sm:grid grid-cols-12 gap-1 bg-border border-b border-border">
+                <div className="col-span-1 p-4 col-header">#</div>
+                <div className="col-span-3 p-4 col-header">Tracking ID</div>
+                <div className="col-span-3 p-4 col-header">Receiver</div>
+                <div className="col-span-2 p-4 col-header">Status</div>
+                <div className="col-span-3 p-4 col-header text-right">Actions</div>
+              </div>
+              <div className="flex flex-col divide-y divide-border">
+                {filteredShipments.map((shipment, idx) => (
+                  <div key={shipment.id} className="flex flex-col sm:grid sm:grid-cols-12 gap-1 hover:bg-bg transition-colors items-start sm:items-center group p-4 sm:p-0">
+                    <div className="hidden sm:block col-span-1 p-4 text-[10px] font-mono text-muted">{(idx + 1).toString().padStart(2, '0')}</div>
+                    <div className="col-span-3 sm:p-4 font-mono font-bold text-primary text-xs flex flex-col sm:block gap-1">
+                      <span className="sm:hidden text-[9px] text-muted uppercase tracking-widest">Tracking ID</span>
+                      {shipment.trackingNumber}
+                    </div>
+                    <div className="col-span-3 sm:p-4 font-bold text-text text-sm flex flex-col sm:block gap-1 mt-2 sm:mt-0">
+                      <span className="sm:hidden text-[9px] text-muted uppercase tracking-widest">Receiver</span>
+                      {shipment.receiverName}
+                    </div>
+                    <div className="col-span-2 sm:p-4 mt-2 sm:mt-0">
+                      <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-sm border ${
+                        shipment.status === 'delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                        shipment.status === 'cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}>
+                        {shipment.status}
+                      </span>
+                    </div>
+                    <div className="col-span-3 sm:p-4 text-right w-full sm:w-auto mt-4 sm:mt-0">
+                      <div className="flex justify-start sm:justify-end gap-1">
+                        <button 
+                          onClick={() => setShowReceipt(shipment)}
+                          className="p-2 hover:bg-white rounded border border-transparent hover:border-border text-muted hover:text-primary transition-all"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setEditingShipment(shipment);
+                            setShipmentData({
+                              trackingNumber: shipment.trackingNumber,
+                              senderName: shipment.senderName || '',
+                              senderEmail: shipment.senderEmail || '',
+                              senderPhone: shipment.senderPhone || '',
+                              senderAddress: shipment.senderAddress || '',
+                              receiverName: shipment.receiverName || '',
+                              receiverEmail: shipment.receiverEmail || '',
+                              receiverPhone: shipment.receiverPhone || '',
+                              receiverAddress: shipment.receiverAddress || '',
+                              origin: shipment.origin || '',
+                              destination: shipment.destination || '',
+                              status: shipment.status,
+                              weight: shipment.weight ? shipment.weight.toString() : '',
+                              dimensions: shipment.dimensions || '',
+                              serviceType: shipment.serviceType || 'Express',
+                              estimatedDelivery: shipment.estimatedDelivery || '',
+                              packageImage: shipment.packageImage || ''
+                            });
+                            setShowShipmentForm(true);
+                          }}
+                          className="p-2 hover:bg-white rounded border border-transparent hover:border-border text-muted hover:text-primary transition-all"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setConfirmDeleteId(shipment.id);
+                            setConfirmDeleteType('shipment');
+                          }}
+                          className="p-2 hover:bg-rose-50 rounded border border-transparent hover:border-rose-200 text-muted hover:text-rose-600 transition-all"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedShipment(shipment);
+                            setNewStatus(shipment.status);
+                            setUpdateImage(shipment.packageImage || '');
+                          }}
+                          className="p-2 bg-primary text-white rounded hover:bg-accent transition-all"
+                        >
+                          <Clock className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -603,18 +722,23 @@ export default function AdminPanel() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 bg-border border border-border">
               {flights.map(flight => (
-                <div key={flight.id} className="card-modern p-6 bg-white flex flex-col gap-6 group hover:border-primary/20 transition-all">
+                <div key={flight.id} className="bg-white p-8 flex flex-col gap-8 group hover:bg-primary hover:text-white transition-all duration-300">
                   <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2 bg-primary/5 text-primary px-3 py-1 rounded-lg font-bold text-xs">
-                      <Plane className="w-3.5 h-3.5" /> {flight.flightNumber}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-bg group-hover:bg-white/10 flex items-center justify-center transition-colors">
+                        <Plane className="w-5 h-5 group-hover:text-accent transition-colors" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-micro opacity-50">Flight ID</span>
+                        <span className="font-mono font-bold tracking-tighter">{flight.flightNumber}</span>
+                      </div>
                     </div>
                     <div className="flex gap-1">
                       <button 
                         onClick={() => setShowReceipt(flight)}
-                        className="p-2 hover:bg-bg rounded-lg text-muted hover:text-primary transition-all"
-                        title="View Receipt"
+                        className="p-2 hover:bg-bg group-hover:hover:bg-white/10 rounded transition-all"
                       >
                         <FileText className="w-4 h-4" />
                       </button>
@@ -623,8 +747,7 @@ export default function AdminPanel() {
                           setSelectedFlight(flight);
                           setFlightData({ ...flightData, status: flight.status });
                         }}
-                        className="p-2 hover:bg-bg rounded-lg text-muted hover:text-primary transition-all"
-                        title="Post Update"
+                        className="p-2 hover:bg-bg group-hover:hover:bg-white/10 rounded transition-all"
                       >
                         <Clock className="w-4 h-4" />
                       </button>
@@ -641,7 +764,7 @@ export default function AdminPanel() {
                           });
                           setShowFlightForm(true);
                         }}
-                        className="p-2 hover:bg-bg rounded-lg text-muted hover:text-primary transition-all"
+                        className="p-2 hover:bg-bg group-hover:hover:bg-white/10 rounded transition-all"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -650,39 +773,53 @@ export default function AdminPanel() {
                           setConfirmDeleteId(flight.id);
                           setConfirmDeleteType('flight');
                         }}
-                        className="p-2 hover:bg-rose-50 rounded-lg text-muted hover:text-rose-600 transition-all"
-                        title="Delete Flight"
+                        className="p-2 hover:bg-rose-50 group-hover:hover:bg-rose-500 rounded transition-all"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between gap-4 py-2">
+                  <div className="flex items-center justify-between gap-6">
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-bold text-muted tracking-widest mb-1">Origin</span>
-                      <span className="text-2xl font-black tracking-tight text-text">{flight.origin}</span>
+                      <span className="text-micro opacity-50 mb-1">Origin</span>
+                      <span className="text-3xl font-black tracking-tighter heading-display">{flight.origin}</span>
                     </div>
-                    <div className="flex-1 flex items-center justify-center">
-                      <div className="w-full h-px bg-border relative">
-                        <Plane className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-muted/30" />
+                    <div className="flex-1 flex items-center justify-center relative">
+                      <div className="w-full h-px bg-border group-hover:bg-white/20" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.div
+                          animate={{ x: [-20, 20], opacity: [0, 1, 0] }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                        >
+                          <Plane className="w-4 h-4 text-accent" />
+                        </motion.div>
                       </div>
                     </div>
                     <div className="flex flex-col text-right">
-                      <span className="text-[10px] uppercase font-bold text-muted tracking-widest mb-1">Destination</span>
-                      <span className="text-2xl font-black tracking-tight text-text">{flight.destination}</span>
+                      <span className="text-micro opacity-50 mb-1">Destination</span>
+                      <span className="text-3xl font-black tracking-tighter heading-display">{flight.destination}</span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-4 border-t border-border">
+                  <div className="flex justify-between items-center pt-6 border-t border-border group-hover:border-white/10">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-micro opacity-50">Schedule</span>
+                      <div className="flex items-center gap-2 font-mono text-xs">
+                        <span>{flight.departureTime ? format(new Date(flight.departureTime), 'HH:mm') : '--:--'}</span>
+                        <ArrowRight className="w-3 h-3 opacity-30" />
+                        <span>{flight.arrivalTime ? format(new Date(flight.arrivalTime), 'HH:mm') : '--:--'}</span>
+                      </div>
+                    </div>
                     <select 
                       value={flight.status}
                       onChange={(e) => handleUpdateFlightStatus(flight.id, e.target.value as FlightStatus)}
                       disabled={updating}
-                      className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border-none cursor-pointer focus:ring-2 focus:ring-primary/20 transition-all ${
-                        flight.status === 'arrived' ? 'bg-emerald-100 text-emerald-700' : 
-                        flight.status === 'delayed' ? 'bg-amber-100 text-amber-700' : 
-                        flight.status === 'cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-primary/10 text-primary'
+                      className={`text-[10px] font-bold uppercase px-3 py-1 rounded-sm border cursor-pointer transition-all ${
+                        flight.status === 'arrived' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-500 group-hover:text-white group-hover:border-transparent' : 
+                        flight.status === 'delayed' ? 'bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-500 group-hover:text-white group-hover:border-transparent' : 
+                        flight.status === 'cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-500 group-hover:text-white group-hover:border-transparent' : 
+                        'bg-primary/5 text-primary border-primary/10 group-hover:bg-white/10 group-hover:text-white group-hover:border-white/20'
                       }`}
                     >
                       <option value="scheduled">Scheduled</option>
@@ -691,12 +828,6 @@ export default function AdminPanel() {
                       <option value="delayed">Delayed</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
-                    <div className="flex items-center gap-2 text-muted">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span className="text-xs font-bold">
-                        {flight.departureTime ? format(new Date(flight.departureTime), 'HH:mm') : 'N/A'}
-                      </span>
-                    </div>
                   </div>
                 </div>
               ))}
@@ -799,83 +930,87 @@ export default function AdminPanel() {
       {activeTab === 'cs' && (
         <div className="flex flex-col gap-8">
           <div className="flex flex-col">
-            <h3 className="text-2xl font-bold tracking-tight text-text">Customer Support Tickets</h3>
-            <p className="text-sm text-muted font-medium">Respond to user inquiries and issues</p>
+            <h3 className="text-2xl font-black tracking-tighter heading-display text-text">SUPPORT_LOGS</h3>
+            <p className="text-micro opacity-50 uppercase tracking-widest">Inbound terminal communications and system tickets</p>
           </div>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1 bg-border border border-border">
             {tickets.length === 0 ? (
-              <div className="py-24 text-center card-modern bg-white/50 border-dashed flex flex-col items-center gap-4">
+              <div className="py-24 text-center bg-white flex flex-col items-center gap-4">
                 <MessageSquare className="w-12 h-12 text-muted/20" />
-                <p className="text-sm font-bold text-muted uppercase tracking-widest">No active tickets</p>
+                <p className="text-micro font-bold text-muted uppercase tracking-widest">No active terminal sessions</p>
               </div>
             ) : (
               tickets.map(ticket => (
-                <div key={ticket.id} className="card-modern p-6 bg-white flex flex-col md:flex-row justify-between gap-6 hover:border-primary/20 transition-all">
-                  <div className="flex flex-col gap-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
-                        ticket.status === 'open' ? 'bg-amber-100 text-amber-700' : 
-                        ticket.status === 'pending' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
-                      }`}>
-                        {ticket.status}
+                <div key={ticket.id} className="p-8 bg-white flex flex-col md:flex-row justify-between gap-8 hover:bg-bg transition-all group">
+                  <div className="flex flex-col gap-4 flex-1">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-2 h-2 rounded-full animate-pulse ${
+                        ticket.status === 'open' ? 'bg-amber-500' : 
+                        ticket.status === 'pending' ? 'bg-blue-500' : 'bg-emerald-500'
+                      }`} />
+                      <span className="text-micro font-bold text-muted uppercase tracking-widest">
+                        {ticket.status} // {format(new Date(ticket.createdAt), 'yyyy.MM.dd HH:mm:ss')}
                       </span>
-                      <span className="text-xs font-bold text-muted uppercase tracking-widest">{format(new Date(ticket.createdAt), 'MMM dd, HH:mm')}</span>
                     </div>
-                    <h4 className="text-xl font-bold text-text tracking-tight">{ticket.subject}</h4>
-                    <p className="text-muted font-medium leading-relaxed">{ticket.message}</p>
+                    <h4 className="text-2xl font-black tracking-tighter heading-display text-text uppercase">{ticket.subject}</h4>
+                    <div className="font-mono text-sm text-muted leading-relaxed border-l-2 border-border pl-6 py-2 italic">
+                      {ticket.message}
+                    </div>
                     {ticket.reply && (
-                      <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 mt-2">
-                        <span className="text-[10px] font-bold text-primary uppercase tracking-widest block mb-1">Admin Reply</span>
-                        <p className="text-sm font-medium text-text">{ticket.reply}</p>
+                      <div className="bg-primary text-white p-6 rounded-sm mt-4 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2 opacity-10">
+                          <MessageSquare className="w-12 h-12" />
+                        </div>
+                        <span className="text-micro font-bold uppercase tracking-widest block mb-2 opacity-70">Terminal_Reply_Auth_Admin</span>
+                        <p className="font-mono text-sm">{ticket.reply}</p>
                       </div>
                     )}
                   </div>
                   {ticket.status !== 'resolved' && (
-                    <div className="flex flex-col gap-3 w-full md:min-w-[300px] md:w-auto">
-                      <div className="flex justify-end mb-2">
+                    <div className="flex flex-col gap-4 w-full md:min-w-[320px] md:w-auto">
+                      <div className="flex justify-end">
                         <button 
                           onClick={() => {
                             setConfirmDeleteId(ticket.id);
                             setConfirmDeleteType('ticket');
                           }}
-                          className="p-2 hover:bg-rose-50 rounded-lg text-muted hover:text-rose-600 transition-all"
-                          title="Delete Ticket"
+                          className="p-2 hover:bg-rose-50 rounded text-muted hover:text-rose-600 transition-all border border-transparent hover:border-rose-200"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                       {replyingTo === ticket.id ? (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-3">
                           <textarea
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            placeholder="Type your reply..."
-                            className="input-modern text-sm min-h-[100px] resize-none"
+                            placeholder="Enter terminal response..."
+                            className="input-modern font-mono text-xs min-h-[120px] resize-none bg-bg border-border focus:border-primary"
                           />
                           <div className="flex gap-2">
                             <button 
                               onClick={() => handleResolveTicket(ticket.id)}
-                              className="btn-primary py-2 flex-1 text-xs"
+                              className="bg-primary text-white py-3 flex-1 text-micro font-bold uppercase tracking-widest hover:bg-accent transition-all"
                             >
-                              Send & Resolve
+                              Execute_Resolve
                             </button>
                             <button 
                               onClick={() => {
                                 setReplyingTo(null);
                                 setReplyText('');
                               }}
-                              className="btn-secondary py-2 flex-1 text-xs"
+                              className="bg-bg text-muted py-3 flex-1 text-micro font-bold uppercase tracking-widest hover:bg-border transition-all border border-border"
                             >
-                              Cancel
+                              Abort
                             </button>
                           </div>
                         </div>
                       ) : (
                         <button 
                           onClick={() => setReplyingTo(ticket.id)}
-                          className="btn-primary py-2.5 px-6 text-xs"
+                          className="bg-primary text-white py-4 px-8 text-micro font-bold uppercase tracking-widest hover:bg-accent transition-all shadow-lg shadow-primary/20"
                         >
-                          Reply & Resolve
+                          Initialize_Response
                         </button>
                       )}
                     </div>
@@ -890,36 +1025,41 @@ export default function AdminPanel() {
       {activeTab === 'reviews' && (
         <div className="flex flex-col gap-8">
           <div className="flex flex-col">
-            <h3 className="text-2xl font-bold tracking-tight text-text">User Reviews</h3>
-            <p className="text-sm text-muted font-medium">Monitor customer feedback and satisfaction</p>
+            <h3 className="text-2xl font-black tracking-tighter heading-display text-text">USER_FEEDBACK</h3>
+            <p className="text-micro opacity-50 uppercase tracking-widest">Public sentiment and service quality metrics</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 bg-border border border-border">
             {reviews.length === 0 ? (
-              <div className="col-span-full py-24 text-center card-modern bg-white/50 border-dashed flex flex-col items-center gap-4">
+              <div className="col-span-full py-24 text-center bg-white flex flex-col items-center gap-4">
                 <Star className="w-12 h-12 text-muted/20" />
-                <p className="text-sm font-bold text-muted uppercase tracking-widest">No reviews yet</p>
+                <p className="text-micro font-bold text-muted uppercase tracking-widest">No data points available</p>
               </div>
             ) : (
               reviews.map(review => (
-                <div key={review.id} className="card-modern p-6 bg-white flex flex-col gap-5 hover:border-primary/20 transition-all">
+                <div key={review.id} className="p-8 bg-white flex flex-col gap-6 hover:bg-bg transition-all group">
                   <div className="flex justify-between items-start">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-text">{review.userName}</span>
-                      <span className="text-xs font-bold text-muted uppercase tracking-widest">{format(new Date(review.createdAt), 'MMM dd, yyyy')}</span>
+                      <span className="text-sm font-black tracking-tight text-text uppercase">{review.userName}</span>
+                      <span className="text-micro font-bold text-muted uppercase tracking-widest">{format(new Date(review.createdAt), 'yyyy.MM.dd')}</span>
                     </div>
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map(star => (
                         <Star 
                           key={star} 
-                          className={`w-4 h-4 ${star <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-border'}`} 
+                          className={`w-3 h-3 ${star <= review.rating ? 'fill-accent text-accent' : 'text-border'}`} 
                         />
                       ))}
                     </div>
                   </div>
-                  <div className="bg-bg rounded-lg p-3 text-[10px] font-bold text-muted uppercase tracking-widest border border-border">
-                    {review.targetType}: <span className="text-primary">{review.targetId}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="px-2 py-0.5 bg-bg border border-border text-[9px] font-mono font-bold text-muted uppercase tracking-widest">
+                      {review.targetType}
+                    </div>
+                    <div className="font-mono text-[9px] font-bold text-primary">
+                      {review.targetId}
+                    </div>
                   </div>
-                  <p className="text-muted font-medium italic leading-relaxed">"{review.comment}"</p>
+                  <p className="font-serif italic text-muted leading-relaxed text-lg">"{review.comment}"</p>
                 </div>
               ))
             )}
@@ -930,11 +1070,11 @@ export default function AdminPanel() {
       {activeTab === 'receipts' && (
         <div className="flex flex-col gap-8">
           <div className="flex flex-col">
-            <h3 className="text-2xl font-bold tracking-tight text-text">Receipt Generation</h3>
-            <p className="text-sm text-muted font-medium">Select a shipment or flight to generate an official receipt</p>
+            <h3 className="text-2xl font-black tracking-tighter heading-display text-text">RECEIPT_GENERATOR</h3>
+            <p className="text-micro opacity-50 uppercase tracking-widest">Official documentation and billing terminal</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="card-modern p-8 bg-white border-2 border-dashed border-primary/20 flex flex-col items-center justify-center gap-4 hover:border-primary/50 transition-all cursor-pointer group"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 bg-border border border-border">
+            <div className="bg-white p-10 flex flex-col items-center justify-center gap-6 hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer group"
               onClick={() => {
                 setManualReceiptData({
                   ...manualReceiptData,
@@ -944,52 +1084,52 @@ export default function AdminPanel() {
                 setShowManualReceiptForm(true);
               }}
             >
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Plus className="w-8 h-8 text-primary" />
+              <div className="w-20 h-20 rounded-full bg-bg group-hover:bg-white/10 flex items-center justify-center transition-all group-hover:scale-110">
+                <Plus className="w-8 h-8 group-hover:text-accent transition-colors" />
               </div>
               <div className="text-center">
-                <h4 className="font-bold text-lg">Create Custom Receipt</h4>
-                <p className="text-sm text-muted">Fill in details manually for a professional receipt</p>
+                <h4 className="font-black text-xl uppercase tracking-tighter heading-display">Manual_Entry</h4>
+                <p className="text-micro opacity-50 uppercase tracking-widest mt-2">Custom billing documentation</p>
               </div>
             </div>
 
-            <div className="card-modern p-8 bg-white">
-              <h4 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <Package className="w-5 h-5 text-primary" /> Shipments
+            <div className="bg-white p-10 flex flex-col gap-8">
+              <h4 className="text-micro font-bold uppercase tracking-widest flex items-center gap-2 opacity-50">
+                <Package className="w-3 h-3" /> Shipments_Queue
               </h4>
-              <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
+              <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {shipments.map(s => (
-                  <div key={s.id} className="flex justify-between items-center p-4 bg-bg rounded-xl border border-border hover:border-primary/30 transition-all">
+                  <div key={s.id} className="flex justify-between items-center p-4 bg-bg border border-border hover:border-primary transition-all group">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold font-mono text-primary">{s.trackingNumber}</span>
-                      <span className="text-sm font-bold">{s.receiverName}</span>
+                      <span className="text-[10px] font-mono font-bold text-primary">{s.trackingNumber}</span>
+                      <span className="text-xs font-bold uppercase tracking-tight">{s.receiverName}</span>
                     </div>
                     <button 
                       onClick={() => setShowReceipt(s)}
-                      className="btn-secondary py-2 px-4 text-xs"
+                      className="p-2 hover:bg-primary hover:text-white rounded transition-all"
                     >
-                      Generate Receipt
+                      <FileText className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="card-modern p-8 bg-white">
-              <h4 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <Plane className="w-5 h-5 text-secondary" /> Flights
+            <div className="bg-white p-10 flex flex-col gap-8">
+              <h4 className="text-micro font-bold uppercase tracking-widest flex items-center gap-2 opacity-50">
+                <Plane className="w-3 h-3" /> Flights_Queue
               </h4>
-              <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
+              <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {flights.map(f => (
-                  <div key={f.id} className="flex justify-between items-center p-4 bg-bg rounded-xl border border-border hover:border-primary/30 transition-all">
+                  <div key={f.id} className="flex justify-between items-center p-4 bg-bg border border-border hover:border-primary transition-all group">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold font-mono text-secondary">{f.flightNumber}</span>
-                      <span className="text-sm font-bold">{f.origin} → {f.destination}</span>
+                      <span className="text-[10px] font-mono font-bold text-secondary">{f.flightNumber}</span>
+                      <span className="text-xs font-bold uppercase tracking-tight">{f.origin} → {f.destination}</span>
                     </div>
                     <button 
                       onClick={() => setShowReceipt(f)}
-                      className="btn-secondary py-2 px-4 text-xs"
+                      className="p-2 hover:bg-primary hover:text-white rounded transition-all"
                     >
-                      Generate Receipt
+                      <FileText className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
@@ -1002,41 +1142,45 @@ export default function AdminPanel() {
       {activeTab === 'users' && (
         <div className="flex flex-col gap-8">
           <div className="flex flex-col">
-            <h3 className="text-2xl font-bold tracking-tight text-text">Registered Users</h3>
-            <p className="text-sm text-muted font-medium">View and manage registered customers</p>
+            <h3 className="text-2xl font-black tracking-tighter heading-display text-text">USER_DATABASE</h3>
+            <p className="text-micro opacity-50 uppercase tracking-widest">Authorized personnel and customer registry</p>
           </div>
           <div className="card-modern overflow-hidden bg-white">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-bg/50 border-b border-border">
-                    <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Name</th>
-                    <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Email</th>
-                    <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Customer ID</th>
-                    <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Role</th>
-                    <th className="p-4 text-xs font-bold text-muted uppercase tracking-widest">Joined</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {users.map((user) => (
-                    <tr key={user.uid} className="hover:bg-bg/30 transition-colors">
-                      <td className="p-4 font-bold text-text">{user.name}</td>
-                      <td className="p-4 text-sm text-muted">{user.email}</td>
-                      <td className="p-4 font-mono font-bold text-primary">{user.customerID}</td>
-                      <td className="p-4">
-                        <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${
-                          user.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-bg text-muted'
-                        }`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm text-muted font-medium">
-                        {user.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="hidden sm:grid grid-cols-12 gap-1 bg-border border-b border-border">
+              <div className="col-span-3 p-4 col-header">Personnel_Name</div>
+              <div className="col-span-3 p-4 col-header">Email_Address</div>
+              <div className="col-span-2 p-4 col-header">Customer_ID</div>
+              <div className="col-span-2 p-4 col-header">Access_Level</div>
+              <div className="col-span-2 p-4 col-header">Registry_Date</div>
+            </div>
+            <div className="flex flex-col divide-y divide-border">
+              {users.map((user) => (
+                <div key={user.uid} className="flex flex-col sm:grid sm:grid-cols-12 gap-1 hover:bg-bg transition-colors items-start sm:items-center group p-4 sm:p-0">
+                  <div className="col-span-3 sm:p-4 font-black tracking-tight text-text uppercase text-sm flex flex-col sm:block gap-1">
+                    <span className="sm:hidden text-[9px] text-muted uppercase tracking-widest">Personnel_Name</span>
+                    {user.name}
+                  </div>
+                  <div className="col-span-3 sm:p-4 text-xs font-mono text-muted flex flex-col sm:block gap-1 mt-2 sm:mt-0">
+                    <span className="sm:hidden text-[9px] text-muted uppercase tracking-widest">Email_Address</span>
+                    {user.email}
+                  </div>
+                  <div className="col-span-2 sm:p-4 font-mono font-bold text-primary text-xs flex flex-col sm:block gap-1 mt-2 sm:mt-0">
+                    <span className="sm:hidden text-[9px] text-muted uppercase tracking-widest">Customer_ID</span>
+                    {user.customerID}
+                  </div>
+                  <div className="col-span-2 sm:p-4 mt-2 sm:mt-0">
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-sm border ${
+                      user.role === 'admin' ? 'bg-primary text-white border-primary' : 'bg-bg text-muted border-border'
+                    }`}>
+                      {user.role}
+                    </span>
+                  </div>
+                  <div className="col-span-2 sm:p-4 text-xs font-mono text-muted mt-2 sm:mt-0">
+                    <span className="sm:hidden text-[9px] text-muted uppercase tracking-widest mr-2">Registry_Date:</span>
+                    {user.createdAt ? format(new Date(user.createdAt), 'yyyy.MM.dd') : 'N/A'}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

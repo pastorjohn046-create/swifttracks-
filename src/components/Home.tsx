@@ -1,10 +1,101 @@
-import { Link } from 'react-router-dom';
-import { Package, ArrowRight, ShieldCheck, Clock, Globe, CheckCircle2, Plane, Truck, Bus, Ship, Star, Search } from 'lucide-react';
+import { useState, FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Package, ArrowRight, ShieldCheck, Clock, Globe, CheckCircle2, Plane, Truck, Bus, Ship, Star, Search, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export default function Home() {
+const GlobeWithPlane = () => {
   return (
-    <div className="flex flex-col gap-12 sm:gap-24 py-6 sm:py-12 relative overflow-hidden">
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Radar Rings */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {[1, 2, 3].map((i) => (
+          <motion.div
+            key={i}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 2, opacity: [0, 0.2, 0] }}
+            transition={{ duration: 4, repeat: Infinity, delay: i * 1.3, ease: "easeOut" }}
+            className="absolute w-64 h-64 border border-primary/20 rounded-full"
+          />
+        ))}
+      </div>
+
+      {/* Globe Container */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        className="relative w-64 h-64 sm:w-96 sm:h-96 rounded-full border border-primary/10 flex items-center justify-center bg-white/5 shadow-[0_0_50px_rgba(0,0,0,0.05)]"
+      >
+        {/* Globe Lines */}
+        <div className="absolute inset-0 rounded-full border border-primary/5 rotate-45"></div>
+        <div className="absolute inset-0 rounded-full border border-primary/5 -rotate-45"></div>
+        <div className="absolute inset-0 rounded-full border border-primary/5 scale-x-50"></div>
+        <div className="absolute inset-0 rounded-full border border-primary/5 scale-y-50"></div>
+        
+        <Globe className="w-32 h-32 sm:w-48 sm:h-48 text-primary/10" />
+      </motion.div>
+
+      {/* Airplane Animation */}
+      <motion.div
+        initial={{ x: -200, y: 100, opacity: 0, rotate: -45 }}
+        animate={{ 
+          x: [ -200, 0, 200 ], 
+          y: [ 100, -100, -200 ],
+          opacity: [ 0, 1, 0 ],
+          rotate: [ -45, -15, 15 ]
+        }}
+        transition={{ 
+          duration: 8, 
+          repeat: Infinity, 
+          ease: "easeInOut",
+          times: [0, 0.5, 1]
+        }}
+        className="absolute z-20 text-accent"
+      >
+        <Plane className="w-12 h-12 fill-accent" />
+      </motion.div>
+
+      {/* Second Airplane for variety */}
+      <motion.div
+        initial={{ x: 200, y: 200, opacity: 0, rotate: 135 }}
+        animate={{ 
+          x: [ 200, 0, -200 ], 
+          y: [ 200, 0, -100 ],
+          opacity: [ 0, 1, 0 ],
+          rotate: [ 135, 165, 195 ]
+        }}
+        transition={{ 
+          duration: 10, 
+          repeat: Infinity, 
+          ease: "easeInOut",
+          delay: 4,
+          times: [0, 0.5, 1]
+        }}
+        className="absolute z-20 text-primary/40"
+      >
+        <Plane className="w-8 h-8" />
+      </motion.div>
+
+      {/* Glow Effect */}
+      <div className="absolute inset-0 bg-accent/5 blur-[100px] rounded-full -z-10"></div>
+    </div>
+  );
+};
+
+export default function Home({ user }: { user?: any }) {
+  const [trackingId, setTrackingId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const handleTrack = (e: FormEvent) => {
+    e.preventDefault();
+    if (!trackingId.trim()) return;
+    setIsSubmitting(true);
+    // Navigate to tracking page with the ID
+    navigate(`/track?id=${trackingId.trim().toUpperCase()}`);
+  };
+
+  return (
+    <div className="flex flex-col relative overflow-hidden bg-atmosphere">
       {/* Background Decorative Elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
         <motion.div
@@ -15,403 +106,265 @@ export default function Home() {
         >
           <Plane className="w-16 h-16 rotate-12" />
         </motion.div>
-        <motion.div
-          initial={{ x: '110vw', y: '40%', opacity: 0 }}
-          animate={{ x: -100, y: '45%', opacity: [0, 0.05, 0.05, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 5 }}
-          className="absolute text-secondary/10"
-        >
-          <Truck className="w-12 h-12" />
-        </motion.div>
-        <motion.div
-          initial={{ x: -100, y: '70%', opacity: 0 }}
-          animate={{ x: '120vw', y: '65%', opacity: [0, 0.08, 0.08, 0] }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear", delay: 10 }}
-          className="absolute text-accent/10"
-        >
-          <Bus className="w-14 h-14" />
-        </motion.div>
       </div>
 
-      {/* Hero Section */}
-      <section className="flex flex-col lg:flex-row items-center gap-12 sm:gap-16 min-h-[60vh] sm:min-h-[70vh] relative">
-        <div className="flex-1 flex flex-col gap-6 sm:gap-8">
+      {/* Hero Section - Split Layout */}
+      <section className="min-h-screen flex flex-col lg:flex-row border-b border-border">
+        <div className="flex-1 flex flex-col justify-center p-8 sm:p-16 lg:p-24 border-r border-border">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-bold w-fit"
+            className="section-label mb-12"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            New: Global Express Tracking
+            Global Logistics Excellence
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.95] text-text"
+            className="text-7xl sm:text-8xl lg:text-[10vw] font-black text-primary heading-display mb-12"
           >
-            Secure <span className="text-primary">Logistics</span> for the Modern World.
+            SECURE <br />
+            <span className="text-accent italic">SYSTEMS.</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg sm:text-xl text-muted max-w-xl leading-relaxed"
+            className="text-lg sm:text-xl text-muted max-w-lg leading-relaxed font-medium mb-12"
           >
-            SwiftTrack provides professional-grade tracking and management for your high-value consignments. Real-time updates, secure storage, and global reach.
+            SwiftTrack provides professional-grade tracking and management for high-value consignments. Precision engineering for the modern supply chain.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4 mt-2 sm:mt-4"
+            className="flex flex-col sm:flex-row gap-4"
           >
-            <Link 
-              to="/track" 
-              className="btn-primary text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 w-full sm:w-auto"
-            >
-              Track Shipment <ArrowRight className="w-5 h-5" />
+            <Link to="/track" className="btn-primary">
+              Track Shipment <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link 
-              to="/login" 
-              className="btn-secondary text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 w-full sm:w-auto"
-            >
+            <Link to={user ? "/dashboard" : "/login"} className="btn-secondary">
               Get Started
             </Link>
           </motion.div>
-          <div className="flex flex-wrap items-center gap-4 sm:gap-8 mt-2 sm:mt-4">
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
-              <span>256-bit Encryption</span>
+        </div>
+
+        <div className="flex-1 relative bg-white flex items-center justify-center p-12 overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="w-full h-full max-w-2xl aspect-square"
+          >
+            <GlobeWithPlane />
+          </motion.div>
+          
+          {/* Technical Overlay */}
+          <div className="absolute top-12 right-12 text-right hidden sm:block">
+            <div className="text-[10px] font-mono text-muted uppercase tracking-[0.3em] mb-2">System Status</div>
+            <div className="flex items-center justify-end gap-2 text-xs font-bold text-primary">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              OPERATIONAL / 24.03.2026
             </div>
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
-              <span>Global Network</span>
+          </div>
+
+          <div className="absolute bottom-12 left-12 hidden sm:block">
+            <div className="text-[10px] font-mono text-muted uppercase tracking-[0.3em] mb-2">Network Load</div>
+            <div className="h-1 w-48 bg-border overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: "75%" }}
+                transition={{ duration: 2, delay: 1 }}
+                className="h-full bg-accent"
+              ></motion.div>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="flex-1 relative block w-full lg:w-auto mt-12 lg:mt-0">
-          {/* Moving Airplane */}
-          <motion.div
-            initial={{ x: -50, y: -30, opacity: 0 }}
-            animate={{ x: [0, 150, 300], y: [-30, -60, -90], opacity: [0, 1, 1, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute -top-10 -left-10 text-primary/20 pointer-events-none z-0"
+      {/* Quick Track - Integrated Technical Bar */}
+      <section className="bg-white border-b border-border py-12 px-8 sm:px-16 lg:px-24">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+          <div className="flex flex-col gap-2 min-w-[300px]">
+            <span className="section-label">Self Service</span>
+            <h2 className="text-3xl font-bold heading-display italic">Quick Track.</h2>
+          </div>
+          <form 
+            onSubmit={handleTrack}
+            className="flex-1 w-full flex flex-col sm:flex-row gap-1"
           >
-            <Plane className="w-16 h-16 sm:w-24 sm:h-24 rotate-45" />
-          </motion.div>
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+              <input 
+                type="text"
+                value={trackingId}
+                onChange={(e) => setTrackingId(e.target.value)}
+                placeholder="ENTER TRACKING ID (E.G. ST-XXXX-XX)"
+                className="input-modern pl-12"
+              />
+            </div>
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary min-w-[200px]"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Track Now"}
+            </button>
+          </form>
+        </div>
+      </section>
 
-          {/* Moving Truck/Bus */}
-          <motion.div
-            initial={{ x: 300, y: 150, opacity: 0 }}
-            animate={{ x: [300, 50, -150], y: [150, 160, 170], opacity: [0, 1, 1, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear", delay: 2 }}
-            className="absolute bottom-0 -right-10 text-secondary/20 pointer-events-none z-0"
-          >
-            <Bus className="w-14 h-14 sm:w-20 sm:h-20" />
-          </motion.div>
+      {/* Features - Technical Grid */}
+      <section className="grid grid-cols-1 md:grid-cols-3 bg-border gap-[1px] border-b border-border">
+        {[
+          { label: "Security", title: "SECURE STORAGE.", desc: "Your consignments are stored in high-security facilities with 24/7 monitoring.", icon: ShieldCheck },
+          { label: "Technology", title: "REAL-TIME DATA.", desc: "Get instant notifications and detailed logs of every movement in your shipment's journey.", icon: Clock },
+          { label: "Network", title: "GLOBAL REACH.", desc: "Our logistics network spans 150+ countries, ensuring your items reach their destination safely.", icon: Globe }
+        ].map((feature, i) => (
+          <div key={i} className="bg-white p-12 sm:p-16 flex flex-col gap-8 group hover:bg-bg transition-colors">
+            <span className="section-label">{feature.label}</span>
+            <h3 className="text-3xl font-bold heading-display">{feature.title}</h3>
+            <p className="text-muted leading-relaxed font-medium">{feature.desc}</p>
+            <div className="w-12 h-12 border border-border flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+              <feature.icon className="w-5 h-5" />
+            </div>
+          </div>
+        ))}
+      </section>
 
-          <div className="relative z-10 card-modern p-6 sm:p-8 bg-white/50 backdrop-blur-xl border-white/20 shadow-2xl rotate-2 lg:rotate-3 hover:rotate-0 transition-transform duration-500 max-w-md mx-auto lg:max-w-none">
+      {/* About Us - Editorial Split */}
+      <section className="flex flex-col lg:flex-row border-b border-border">
+        <div className="flex-1 p-8 sm:p-16 lg:p-24 border-r border-border">
+          <div className="flex flex-col gap-12">
             <div className="flex flex-col gap-6">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white">
-                    <Package className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">Shipment #ST8291</h4>
-                    <p className="text-sm text-muted">In Transit - London, UK</p>
-                  </div>
-                </div>
-                <span className="px-3 py-1 bg-secondary/10 text-secondary text-xs font-bold rounded-full uppercase">Priority</span>
+              <span className="section-label">Our Heritage</span>
+              <h2 className="text-6xl md:text-8xl font-black text-primary heading-display">EST. 2010.</h2>
+              <p className="text-xl text-muted leading-relaxed font-medium">
+                SwiftTrack has grown from a local courier service to a global logistics powerhouse. We specialize in high-value, time-sensitive consignments.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+              <div className="flex flex-col gap-4">
+                <h4 className="font-bold text-lg heading-display">Our Mission</h4>
+                <p className="text-muted text-sm font-medium leading-relaxed">To provide the world's most secure and transparent logistics infrastructure for high-value goods.</p>
               </div>
-              <div className="h-2 w-full bg-border rounded-full overflow-hidden">
-                <div className="h-full bg-primary w-2/3 rounded-full"></div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-bg rounded-xl border border-border">
-                  <p className="text-xs text-muted uppercase font-bold tracking-widest mb-1">Origin</p>
-                  <p className="font-bold">New York, US</p>
-                </div>
-                <div className="p-4 bg-bg rounded-xl border border-border">
-                  <p className="text-xs text-muted uppercase font-bold tracking-widest mb-1">Destination</p>
-                  <p className="font-bold">Tokyo, JP</p>
-                </div>
+              <div className="flex flex-col gap-4">
+                <h4 className="font-bold text-lg heading-display">Our Vision</h4>
+                <p className="text-muted text-sm font-medium leading-relaxed">A world where global trade is seamless, secure, and accessible to everyone, everywhere.</p>
               </div>
             </div>
-          </div>
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
-        </div>
-      </section>
-
-      {/* Quick Track Section */}
-      <section className="flex flex-col gap-8 py-12 bg-bg/50 rounded-[3rem] border border-border p-8 sm:p-16 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10"></div>
-        <div className="text-center flex flex-col gap-4 max-w-2xl mx-auto">
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-text">Quick <span className="text-primary">Track</span></h2>
-          <p className="text-lg text-muted font-medium">Instantly check the status of your consignment without logging in.</p>
-        </div>
-        <div className="max-w-xl mx-auto w-full">
-          <Link 
-            to="/track" 
-            className="group flex items-center justify-between p-6 bg-white rounded-3xl border-2 border-primary/10 hover:border-primary transition-all shadow-xl shadow-primary/5"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                <Search className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg text-text">Enter Tracking ID</span>
-                <span className="text-xs text-muted font-bold uppercase tracking-widest">Real-time GPS Monitoring</span>
-              </div>
-            </div>
-            <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-2 transition-transform" />
-          </Link>
-        </div>
-      </section>
-
-      {/* About Us Section */}
-      <section className="flex flex-col lg:flex-row items-center gap-16 py-12">
-        <div className="flex-1 relative">
-          <div className="relative z-10 grid grid-cols-2 gap-4">
-            <motion.div 
-              whileHover={{ scale: 1.05, rotate: -2 }}
-              className="aspect-square bg-primary/10 rounded-3xl flex items-center justify-center border border-primary/20"
-            >
-              <Globe className="w-16 h-16 text-primary animate-pulse" />
-            </motion.div>
-            <motion.div 
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              className="aspect-square bg-secondary/10 rounded-3xl flex items-center justify-center border border-secondary/20 mt-8"
-            >
-              <ShieldCheck className="w-16 h-16 text-secondary" />
-            </motion.div>
-            <motion.div 
-              whileHover={{ scale: 1.05, rotate: -2 }}
-              className="aspect-square bg-accent/10 rounded-3xl flex items-center justify-center border border-accent/20 -mt-8"
-            >
-              <Clock className="w-16 h-16 text-accent" />
-            </motion.div>
-            <motion.div 
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              className="aspect-square bg-primary/5 rounded-3xl flex items-center justify-center border border-primary/10"
-            >
-              <Package className="w-16 h-16 text-primary/40" />
-            </motion.div>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl -z-10"></div>
-        </div>
-        <div className="flex-1 flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-text">About <span className="text-primary">SwiftTrack</span></h2>
-            <p className="text-xl text-muted leading-relaxed font-medium">
-              Founded in 2010, SwiftTrack has grown from a local courier service to a global logistics powerhouse. We specialize in high-value, time-sensitive consignments that require more than just a delivery—they require a promise of security and precision.
-            </p>
-            <Link to="/about" className="btn-secondary self-start mt-4">
-              Learn More About Us <ArrowRight className="w-4 h-4" />
+            <Link to="/about" className="btn-secondary self-start">
+              Full Story <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+        </div>
+        <div className="flex-1 bg-white p-12 flex items-center justify-center relative overflow-hidden">
+          <div className="w-full h-full max-w-lg aspect-square relative">
+            <img 
+              src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=1000" 
+              alt="Warehouse" 
+              className="w-full h-full object-cover grayscale opacity-20"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 border border-border m-8"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-24 h-24 bg-primary flex items-center justify-center text-white">
+                <Globe className="w-10 h-10 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Process - Dark Technical Section */}
+      <section className="bg-primary text-white py-24 px-8 sm:px-16 lg:px-24">
+        <div className="flex flex-col lg:flex-row justify-between items-end gap-12 mb-24">
           <div className="flex flex-col gap-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-bold text-lg">Our Mission</h4>
-                <p className="text-muted text-sm">To provide the world's most secure and transparent logistics infrastructure for high-value goods.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-bold text-lg">Our Vision</h4>
-                <p className="text-muted text-sm">A world where global trade is seamless, secure, and accessible to everyone, everywhere.</p>
-              </div>
-            </div>
+            <span className="section-label !text-accent">Process</span>
+            <h2 className="text-6xl md:text-9xl font-black heading-display italic">LOGISTICS.</h2>
           </div>
-          <motion.div 
-            whileHover={{ x: 10 }}
-            className="flex items-center gap-4 p-6 bg-white rounded-3xl border border-border shadow-xl shadow-primary/5"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-text">Certified Global Partner</p>
-              <p className="text-xs text-muted font-medium uppercase tracking-widest">ISO 9001:2015 & TAPA Certified</p>
-            </div>
-          </motion.div>
+          <p className="text-xl text-white/40 max-w-xs font-medium">A simple, transparent process for all your logistics needs.</p>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        <div className="flex flex-col gap-6 p-8 card-modern hover:-translate-y-2 transition-transform">
-          <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <h3 className="text-2xl font-bold tracking-tight">Secure Storage</h3>
-          <p className="text-muted leading-relaxed">Your consignments are stored in high-security facilities with 24/7 monitoring and insurance coverage.</p>
-        </div>
-        <div className="flex flex-col gap-6 p-8 card-modern hover:-translate-y-2 transition-transform">
-          <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary">
-            <Clock className="w-8 h-8" />
-          </div>
-          <h3 className="text-2xl font-bold tracking-tight">Real-time Updates</h3>
-          <p className="text-muted leading-relaxed">Get instant notifications and detailed logs of every movement in your shipment's journey.</p>
-        </div>
-        <div className="flex flex-col gap-6 p-8 card-modern hover:-translate-y-2 transition-transform">
-          <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
-            <Globe className="w-8 h-8" />
-          </div>
-          <h3 className="text-2xl font-bold tracking-tight">Global Network</h3>
-          <p className="text-muted leading-relaxed">Our logistics network spans 150+ countries, ensuring your items reach their destination safely.</p>
-        </div>
-      </section>
-
-      {/* How it Works Section */}
-      <section className="flex flex-col gap-16">
-        <div className="flex flex-col gap-4 max-w-2xl">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-text">How it <span className="text-primary">Works</span></h2>
-          <p className="text-xl text-muted">A simple, transparent process for all your logistics needs.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 bg-white/10 gap-[1px] border border-white/10">
           {[
-            { step: "01", title: "Book", desc: "Create a shipment request through our intuitive dashboard." },
-            { step: "02", title: "Pickup", desc: "Our couriers collect your package from your preferred location." },
-            { step: "03", title: "Transit", desc: "Monitor your package in real-time as it moves through our hubs." },
-            { step: "04", title: "Deliver", desc: "Safe and secure delivery to the final destination." }
+            { step: "01", title: "BOOK", desc: "Create a shipment request through our intuitive dashboard." },
+            { step: "02", title: "PICKUP", desc: "Our couriers collect your package from your preferred location." },
+            { step: "03", title: "TRANSIT", desc: "Monitor your package in real-time as it moves through our hubs." },
+            { step: "04", title: "DELIVER", desc: "Safe and secure delivery to the final destination." }
           ].map((item, i) => (
-            <div key={i} className="flex flex-col gap-4 p-6 bg-bg rounded-3xl border border-border">
-              <span className="text-4xl font-black text-primary/20">{item.step}</span>
-              <h4 className="text-xl font-bold">{item.title}</h4>
-              <p className="text-sm text-muted font-medium leading-relaxed">{item.desc}</p>
+            <div key={i} className="bg-primary p-12 flex flex-col gap-12 hover:bg-white/5 transition-colors">
+              <span className="text-5xl font-black text-white/10 heading-display">{item.step}</span>
+              <div className="flex flex-col gap-4">
+                <h4 className="text-xl font-bold heading-display tracking-widest">{item.title}</h4>
+                <p className="text-xs text-white/40 font-medium leading-relaxed uppercase tracking-wider">{item.desc}</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Global Presence Section */}
-      <section className="flex flex-col lg:flex-row items-center gap-16">
-        <div className="flex-1 flex flex-col gap-8">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-text">Global <span className="text-secondary">Presence</span></h2>
-          <p className="text-xl text-muted leading-relaxed">
-            With major hubs in New York, London, Tokyo, and Dubai, we provide seamless logistics solutions across all continents. Our strategic partnerships allow us to navigate complex customs and local regulations with ease.
-          </p>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col gap-1">
-              <span className="text-3xl font-black text-text">150+</span>
-              <span className="text-xs font-bold text-muted uppercase tracking-widest">Countries Covered</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-3xl font-black text-text">24/7</span>
-              <span className="text-xs font-bold text-muted uppercase tracking-widest">Support Availability</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-3xl font-black text-text">99.9%</span>
-              <span className="text-xs font-bold text-muted uppercase tracking-widest">Delivery Success Rate</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-3xl font-black text-text">1M+</span>
-              <span className="text-xs font-bold text-muted uppercase tracking-widest">Packages Delivered</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 w-full h-[400px] bg-bg rounded-[3rem] border border-border relative overflow-hidden flex items-center justify-center">
-          <Globe className="w-48 h-48 text-primary/10 animate-pulse" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative w-full h-full">
-              {/* Decorative dots representing cities */}
-              <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-primary rounded-full animate-ping"></div>
-              <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-secondary rounded-full animate-ping delay-700"></div>
-              <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-accent rounded-full animate-ping delay-1000"></div>
-              <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-primary rounded-full animate-ping delay-300"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Reviews Section */}
-      <section className="flex flex-col gap-12 py-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-          <div className="flex flex-col gap-4 max-w-2xl">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-text">Trusted by <span className="text-primary">Thousands</span></h2>
-            <p className="text-xl text-muted">Don't just take our word for it. Here's what our global partners and clients have to say.</p>
+      {/* Reviews - Editorial Grid */}
+      <section className="py-24 px-8 sm:px-16 lg:px-24 border-b border-border">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-12 mb-24">
+          <div className="flex flex-col gap-6">
+            <span className="section-label">Testimonials</span>
+            <h2 className="text-6xl md:text-8xl font-black text-primary heading-display italic">TRUSTED.</h2>
           </div>
           <Link to="/reviews" className="btn-secondary">
-            View All 15 Reviews <ArrowRight className="w-4 h-4" />
+            All Reviews <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 bg-border gap-[1px] border border-border">
           {[
             { name: "Robert Chen", role: "Logistics Director", text: "SwiftTrack has revolutionized how we manage our high-value electronics shipments. The real-time visibility is unmatched.", rating: 5 },
             { name: "Sarah Jenkins", role: "E-commerce Founder", text: "The most reliable logistics partner we've ever worked with. Their customer support is proactive and extremely helpful.", rating: 5 },
-            { name: "Marcus Thorne", role: "Global Operations", text: "Security was our main concern for luxury goods. SwiftTrack's secure storage and tracking gave us complete peace of mind.", rating: 5 },
-            { name: "Elena Rodriguez", role: "Supply Chain Manager", text: "The dashboard is incredibly intuitive. I can manage hundreds of shipments across continents with just a few clicks.", rating: 5 },
-            { name: "David Kim", role: "Tech CEO", text: "Fast, secure, and professional. SwiftTrack is our go-to for all international hardware deliveries.", rating: 5 },
-            { name: "Aisha Al-Fayed", role: "Import/Export Specialist", text: "Navigating customs used to be a nightmare. With SwiftTrack, it's handled automatically. Truly a game-changer.", rating: 5 },
-            { name: "Thomas Müller", role: "Manufacturing Lead", text: "Precision is key in our industry. SwiftTrack's time-sensitive delivery has never let us down.", rating: 5 },
-            { name: "Linda Wu", role: "Retail Chain Owner", text: "The cost-to-value ratio is excellent. We've seen a significant drop in lost consignments since switching.", rating: 5 },
-            { name: "James Wilson", role: "Art Gallery Curator", text: "Shipping priceless art requires extreme care. SwiftTrack's specialized handling is the best in the business.", rating: 5 },
-            { name: "Sofia Conti", role: "Fashion Designer", text: "Getting our collections to global runways on time is critical. SwiftTrack is our most trusted partner.", rating: 5 },
-            { name: "Kevin O'Brien", role: "Pharma Logistics", text: "Temperature-controlled and secure. They handle our sensitive medical supplies with the utmost professionalism.", rating: 5 },
-            { name: "Yuki Tanaka", role: "Automotive Parts Dist.", text: "The tracking updates are so detailed, we always know exactly where our parts are in the supply chain.", rating: 5 },
-            { name: "Isabella Silva", role: "Wine Exporter", text: "Fragile goods are safe in their hands. We've shipped thousands of cases with zero breakage.", rating: 5 },
-            { name: "Ahmed Hassan", role: "Tech Distributor", text: "Their global network is truly impressive. Even the most remote locations are reachable with SwiftTrack.", rating: 5 },
-            { name: "Chloe Bennett", role: "Jewelry Designer", text: "The insurance and security protocols they have in place are top-notch. I wouldn't trust anyone else with my pieces.", rating: 5 }
+            { name: "Marcus Thorne", role: "Global Operations", text: "Security was our main concern for luxury goods. SwiftTrack's secure storage and tracking gave us complete peace of mind.", rating: 5 }
           ].map((review, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: (i % 3) * 0.1 }}
-              viewport={{ once: true }}
-              className="card-modern p-8 bg-white flex flex-col gap-6 hover:shadow-2xl hover:shadow-primary/10 transition-all group"
-            >
+            <div key={i} className="bg-white p-12 flex flex-col gap-12 hover:bg-bg transition-colors">
               <div className="flex gap-1">
                 {[...Array(review.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400 group-hover:scale-110 transition-transform" />
+                  <Star key={i} className="w-3 h-3 text-accent fill-accent" />
                 ))}
               </div>
-              <p className="text-lg font-medium text-text leading-relaxed italic">"{review.text}"</p>
+              <p className="text-2xl font-medium text-primary leading-tight heading-display italic">"{review.text}"</p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black">
-                  {review.name.charAt(0)}
+                <div className="w-10 h-10 border border-border flex items-center justify-center text-primary font-black text-[10px]">
+                  {review.name.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-text">{review.name}</span>
-                  <span className="text-xs text-muted font-bold uppercase tracking-widest">{review.role}</span>
+                  <span className="font-bold text-primary text-xs uppercase tracking-widest">{review.name}</span>
+                  <span className="text-[10px] text-muted font-mono uppercase">{review.role}</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-primary rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-16 flex flex-col items-center text-center gap-6 sm:gap-8 relative overflow-hidden">
-        <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8">
-          <h2 className="text-3xl sm:text-6xl font-black tracking-tight text-white leading-tight max-w-3xl">
-            Ready to ship with confidence?
+      {/* CTA - Full Screen Split */}
+      <section className="flex flex-col lg:flex-row bg-primary text-white">
+        <div className="flex-1 p-12 sm:p-24 flex flex-col justify-center gap-12 border-r border-white/10">
+          <span className="section-label !text-accent">Get Started</span>
+          <h2 className="text-6xl sm:text-8xl font-black heading-display italic leading-[0.85]">
+            READY TO <br /> SHIP?
           </h2>
-          <p className="text-white/80 text-lg sm:text-xl max-w-xl">
-            Join thousands of businesses worldwide who trust SwiftTrack for their high-value logistics.
+          <p className="text-white/40 text-xl max-w-md font-medium">
+            Join thousands of global businesses who trust SwiftTrack for their high-value logistics and supply chain management.
           </p>
-          <Link 
-            to="/login" 
-            className="bg-white text-primary px-8 sm:px-12 py-4 sm:py-6 text-lg sm:text-xl font-bold rounded-xl sm:rounded-2xl hover:bg-bg transition-colors shadow-xl w-full sm:w-auto"
-          >
-            Create Your Account
+          <Link to="/login" className="btn-primary !bg-white !text-primary hover:!bg-accent hover:!text-white self-start">
+            CREATE ACCOUNT
           </Link>
         </div>
-        <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+        <div className="flex-1 relative min-h-[400px] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 opacity-10 flex items-center justify-center">
+            <div className="text-[20vw] font-black heading-display italic select-none">SWIFT</div>
+          </div>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
+            className="w-[150%] aspect-square border border-white/5 rounded-full"
+          ></motion.div>
+        </div>
       </section>
     </div>
 

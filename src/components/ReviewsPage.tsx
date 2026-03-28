@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Star, Package, Globe, ShieldCheck, Clock } from 'lucide-react';
+import { Star, Package, Globe, ShieldCheck, Clock, Quote } from 'lucide-react';
 
 const reviews = [
   { name: "Robert Chen", role: "Logistics Director", text: "SwiftTrack has revolutionized how we manage our high-value electronics shipments. The real-time visibility is unmatched.", rating: 5 },
@@ -22,81 +22,110 @@ const reviews = [
 
 export default function ReviewsPage() {
   return (
-    <div className="flex flex-col gap-16 sm:gap-24 animate-fade-in py-8">
-      {/* Hero Section */}
-      <section className="text-center flex flex-col gap-6 max-w-4xl mx-auto">
-        <motion.h1 
+    <div className="flex flex-col gap-24 sm:gap-40 py-12">
+      {/* Hero Section - Editorial Split */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-end">
+        <div className="flex flex-col gap-10">
+          <div className="flex items-center gap-4">
+            <div className="h-[1px] w-12 bg-accent"></div>
+            <span className="text-micro text-accent tracking-[0.2em]">CLIENT TESTIMONIALS</span>
+          </div>
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-6xl sm:text-9xl font-black tracking-tighter text-primary leading-[0.85] heading-display uppercase"
+          >
+            Trusted by <br />
+            <span className="text-muted/30 italic font-serif lowercase">Thousands</span>.
+          </motion.h1>
+        </div>
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl sm:text-7xl font-black tracking-tight text-text"
+          transition={{ delay: 0.2 }}
+          className="flex flex-col gap-8 pb-4"
         >
-          Trusted by <span className="text-primary">Thousands</span>.
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-lg sm:text-xl text-muted leading-relaxed"
-        >
-          Don't just take our word for it. Here's what our global partners and clients have to say about SwiftTrack's logistics solutions.
-        </motion.p>
+          <p className="text-xl sm:text-2xl text-muted leading-relaxed font-medium max-w-xl">
+            Don't just take our word for it. Here's what our global partners and clients have to say about SwiftTrack's logistics solutions.
+          </p>
+        </motion.div>
       </section>
 
-      {/* Reviews Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Reviews Grid - Technical Grid */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border border-primary/10">
         {reviews.map((review, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             transition={{ delay: (i % 3) * 0.1 }}
             viewport={{ once: true }}
-            className="card-modern p-8 bg-white flex flex-col gap-6 hover:shadow-2xl hover:shadow-primary/10 transition-all group"
+            className="bg-white p-12 flex flex-col gap-10 border-r border-b border-primary/10 last:border-r-0 group hover:bg-primary transition-all duration-500"
           >
-            <div className="flex gap-1">
-              {[...Array(review.rating)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400 group-hover:scale-110 transition-transform" />
-              ))}
+            <div className="flex justify-between items-start">
+              <div className="flex gap-1">
+                {[...Array(review.rating)].map((_, i) => (
+                  <Star key={i} className="w-3 h-3 text-accent fill-accent" />
+                ))}
+              </div>
+              <Quote className="w-8 h-8 text-primary/10 group-hover:text-white/10 transition-colors" />
             </div>
-            <p className="text-lg font-medium text-text leading-relaxed italic">"{review.text}"</p>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black">
+            
+            <p className="text-2xl font-medium text-primary group-hover:text-white leading-relaxed italic font-serif transition-colors">
+              "{review.text}"
+            </p>
+            
+            <div className="flex items-center gap-5 mt-auto pt-8 border-t border-primary/5 group-hover:border-white/10 transition-colors">
+              <div className="w-12 h-12 bg-primary group-hover:bg-accent flex items-center justify-center text-white text-sm font-black transition-colors">
                 {review.name.charAt(0)}
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-text">{review.name}</span>
-                <span className="text-xs text-muted font-bold uppercase tracking-widest">{review.role}</span>
+                <span className="font-black text-primary group-hover:text-white text-sm uppercase tracking-widest transition-colors">{review.name}</span>
+                <span className="text-micro text-muted group-hover:text-white/60 uppercase transition-colors">{review.role}</span>
               </div>
             </div>
           </motion.div>
         ))}
       </section>
 
-      {/* Dynamic CTA Section */}
-      <section className="bg-bg rounded-[3rem] border border-border p-8 sm:p-16 flex flex-col items-center text-center gap-8 relative overflow-hidden">
-        <div className="relative z-10 flex flex-col items-center gap-6">
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-text leading-tight max-w-3xl">
-            Join our network of satisfied clients.
-          </h2>
-          <p className="text-muted text-lg sm:text-xl max-w-xl">
-            Experience the SwiftTrack difference today. Secure, transparent, and global.
-          </p>
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary px-12 py-5 text-xl font-bold rounded-2xl shadow-xl shadow-primary/20"
-          >
-            Get Started Now
-          </motion.button>
+      {/* Dynamic CTA Section - Full Screen Split */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 min-h-[60vh]">
+        <div className="bg-primary text-white p-12 sm:p-24 flex flex-col justify-center gap-12 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-5">
+            <span className="text-[20vw] font-black leading-none heading-display uppercase select-none">JOIN.</span>
+          </div>
+          <div className="relative z-10 flex flex-col gap-8">
+            <span className="text-micro text-accent tracking-[0.2em]">GET STARTED</span>
+            <h2 className="text-5xl sm:text-7xl font-black tracking-tighter heading-display uppercase leading-none">
+              Join our network of <br />
+              <span className="text-white/30 italic font-serif lowercase">satisfied</span> clients.
+            </h2>
+            <p className="text-xl text-white/60 max-w-xl font-medium leading-relaxed">
+              Experience the SwiftTrack difference today. Secure, transparent, and global logistics for the modern world.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-6 relative z-10">
+            <button className="btn-primary">Get Started Now</button>
+            <button className="btn-secondary !border-white !text-white hover:!bg-white hover:!text-primary">Contact Sales</button>
+          </div>
         </div>
-        {/* Moving Elements */}
-        <motion.div
-          animate={{ x: [-100, 100], y: [-50, 50] }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse' }}
-          className="absolute top-0 right-0 text-primary/5"
-        >
-          <Package className="w-64 h-64" />
-        </motion.div>
+        <div className="bg-accent p-12 sm:p-24 flex flex-col justify-center items-center text-center gap-12 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent"></div>
+          </div>
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="w-48 h-48 border-2 border-white/30 rounded-full flex items-center justify-center relative"
+          >
+            <div className="absolute inset-0 border border-white/10 rounded-full scale-125"></div>
+            <Package className="w-20 h-20 text-white" />
+          </motion.div>
+          <div className="flex flex-col gap-4">
+            <span className="text-5xl sm:text-8xl font-black text-white heading-display tracking-tighter">99.9%</span>
+            <span className="text-micro text-white/60 tracking-[0.3em] font-mono">DELIVERY SUCCESS RATE</span>
+          </div>
+        </div>
       </section>
     </div>
   );
