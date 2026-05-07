@@ -19,8 +19,7 @@ export default function AdminLogin() {
     try {
       const user = await api.auth.login({ email, password });
       
-      if (user?.role === 'admin' || user.email === 'pastorjohn046@gmail.com') {
-        localStorage.setItem('admin_session', 'true');
+      if (user?.role === 'admin') {
         window.location.href = '/admin';
       } else {
         await api.auth.logout();
@@ -96,35 +95,7 @@ export default function AdminLogin() {
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <ArrowRight className="w-6 h-6" />}
             Authenticate Access
           </button>
-
-          <div className="relative flex items-center gap-4 my-2">
-            <div className="h-px bg-border flex-1"></div>
-            <span className="text-[10px] font-bold text-muted uppercase tracking-widest">OR</span>
-            <div className="h-px bg-border flex-1"></div>
-          </div>
-
-          <button 
-            type="button"
-            onClick={() => {
-              localStorage.setItem('admin_session', 'true');
-              navigate('/admin');
-            }}
-            className="btn-secondary w-full py-4 text-lg border-2 border-primary/20 hover:border-primary/50"
-          >
-            <Shield className="w-6 h-6 text-primary" />
-            Demo Admin Login
-          </button>
         </form>
-
-        <div className="text-center">
-          <p className="text-xs font-medium text-muted mb-2">First time here?</p>
-          <button 
-            onClick={() => navigate('/login')}
-            className="text-xs font-black uppercase tracking-widest text-primary hover:underline"
-          >
-            Create your Admin Account
-          </button>
-        </div>
 
         <div className="pt-6 border-t border-border text-center">
           <p className="text-[10px] font-bold text-muted uppercase tracking-widest leading-relaxed">
