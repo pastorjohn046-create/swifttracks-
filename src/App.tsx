@@ -58,7 +58,7 @@ export default function App() {
 
   return (
     <Router>
-      <SplashScreen />
+      {/* <SplashScreen /> */}
       <Layout user={user} profile={profile}>
         <Routes>
           <Route path="/" element={<Home user={user} />} />
