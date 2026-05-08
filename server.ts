@@ -42,10 +42,23 @@ function getDb() {
 
 function saveDb(db: any) {
   dbCache = db;
-  // Use async write in background to not block
-  fs.writeFile(DB_FILE, JSON.stringify(db, null, 2), (err) => {
-    if (err) console.error('Error saving DB to file:', err);
-  });
+  try {
+    const data = JSON.stringify(db, null, 2);
+    // Atomic write: write to temp file then rename
+    const tempFile = DB_FILE + '.tmp';
+    fs.writeFileSync(tempFile, data);
+    fs.renameSync(tempFile, DB_FILE);
+  } catch (err) {
+    console.error('Error saving DB to file:', err);
+  }
+}
+
+// SSE Clients
+let clients: any[] = [];
+
+function broadcast(type: string, data: any = {}) {
+  const message = `data: ${JSON.stringify({ type, ...data })}\n\n`;
+  clients.forEach(client => client.res.write(message));
 }
 
 async function startServer() {
@@ -67,6 +80,22 @@ async function startServer() {
   // Test Route
   app.get('/api/ping', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // SSE Updates Route
+  app.get('/api/updates', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const clientId = Date.now();
+    const newClient = { id: clientId, res };
+    clients.push(newClient);
+
+    req.on('close', () => {
+      clients = clients.filter(c => c.id !== clientId);
+    });
   });
 
   // Auth Middleware
@@ -132,6 +161,7 @@ async function startServer() {
 
       db.users.push(newUser);
       saveDb(db);
+      broadcast('user_update', { userId: newUser.uid });
 
       const token = jwt.sign({ uid: newUser.uid }, JWT_SECRET, { expiresIn: '30d' });
       res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 30 * 24 * 60 * 60 * 1000 });
@@ -329,6 +359,7 @@ async function startServer() {
       db.users[index] = { ...db.users[index], ...req.body };
     }
     saveDb(db);
+    broadcast('user_update', { userId: req.params.id });
     res.json({ success: true });
   });
 
@@ -355,6 +386,7 @@ async function startServer() {
     const newShipment = { ...req.body, id: Math.random().toString(36).substring(2, 15), createdAt: new Date().toISOString() };
     db.shipments.push(newShipment);
     saveDb(db);
+    broadcast('shipment_update', { id: newShipment.id });
     res.json(newShipment);
   });
 
@@ -377,6 +409,7 @@ async function startServer() {
       db.shipments[index] = { ...db.shipments[index], ...dataToSave };
     }
     saveDb(db);
+    broadcast('shipment_update', { id: req.params.id });
     res.json(db.shipments[index === -1 ? db.shipments.length - 1 : index]);
   });
 
@@ -403,6 +436,7 @@ async function startServer() {
     ) {
       db.shipments[index].senderId = user.uid;
       saveDb(db);
+      broadcast('shipment_update', { id: shipment.id });
       res.json(db.shipments[index]);
     } else {
       res.status(403).json({ error: 'You are not authorized to claim this shipment.' });
@@ -413,6 +447,7 @@ async function startServer() {
     const db = getDb();
     db.shipments = db.shipments.filter((s: any) => s.id !== req.params.id);
     saveDb(db);
+    broadcast('shipment_update', { id: req.params.id, deleted: true });
     res.json({ success: true });
   });
 
@@ -484,6 +519,7 @@ async function startServer() {
     if (!db.flights[index].userIds.includes(user.uid)) {
       db.flights[index].userIds.push(user.uid);
       saveDb(db);
+      broadcast('flight_update', { id: flight.id });
     }
     
     res.json(db.flights[index]);
@@ -494,6 +530,7 @@ async function startServer() {
     const newFlight = { ...req.body, id: Math.random().toString(36).substring(2, 15) };
     db.flights.push(newFlight);
     saveDb(db);
+    broadcast('flight_update', { id: newFlight.id });
     res.json(newFlight);
   });
 
@@ -516,6 +553,7 @@ async function startServer() {
       db.flights[index] = { ...db.flights[index], ...dataToSave };
     }
     saveDb(db);
+    broadcast('flight_update', { id: req.params.id });
     res.json(db.flights[index === -1 ? db.flights.length - 1 : index]);
   });
 
@@ -523,6 +561,7 @@ async function startServer() {
     const db = getDb();
     db.flights = db.flights.filter((f: any) => f.id !== req.params.id);
     saveDb(db);
+    broadcast('flight_update', { id: req.params.id, deleted: true });
     res.json({ success: true });
   });
 
@@ -550,6 +589,7 @@ async function startServer() {
     const newUpdate = { ...req.body, id: Math.random().toString(36).substring(2, 15) };
     db.flights[index].updates.push(newUpdate);
     saveDb(db);
+    broadcast('flight_update', { id: req.params.id, update: newUpdate });
     res.json(newUpdate);
   });
 
