@@ -49,6 +49,7 @@ function getCache(key: string) {
 export const api = {
   auth: {
     async me() {
+      console.log('api.auth.me called');
       try {
         const res = await fetch('/api/auth/me', { credentials: 'include' });
         if (res.status === 401) {

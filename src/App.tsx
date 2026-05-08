@@ -16,6 +16,7 @@ import SupportButton from './components/SupportButton';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
+  console.log('App rendering...');
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
