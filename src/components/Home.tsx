@@ -51,7 +51,7 @@ export default function Home({ user }: { user?: any }) {
   };
 
   return (
-    <div className="flex flex-col relative overflow-hidden bg-atmosphere">
+    <div className="flex flex-col relative overflow-hidden bg-[#F8F9FA] bg-atmosphere">
       <section className="min-h-screen flex flex-col lg:flex-row border-b border-border">
         <div className="flex-1 flex flex-col justify-center p-8 sm:p-16 lg:p-24 border-r border-border">
           <div className="section-label mb-12">Global Logistics Excellence</div>

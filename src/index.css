@@ -1,21 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
-@theme {
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Playfair Display', serif;
-  
-  --color-primary: #0A0A0B;
-  --color-secondary: #2D2D30;
-  --color-accent: #FF5F1F;
-  --color-bg: #F8F9FA;
-  --color-card: #FFFFFF;
-  --color-text: #0A0A0B;
-  --color-muted: #6C757D;
-  --color-border: #E9ECEF;
-}
-
 :root {
   --primary: #0A0A0B;
   --secondary: #2D2D30;
@@ -26,6 +11,21 @@
   --muted: #6C757D;
   --border: #E9ECEF;
   --glow: rgba(255, 95, 31, 0.15);
+}
+
+@theme {
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Playfair Display', serif;
+  
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
 }
 
 html, body {

@@ -23,7 +23,7 @@ export default function Layout({ children, user, profile }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-bg text-text overflow-x-hidden relative">
+    <div className="min-h-[100dvh] flex flex-col bg-[#F8F9FA] text-[#0A0A0B] overflow-x-hidden relative">
       {/* Global Background Animations */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-0 opacity-20">
         <motion.div

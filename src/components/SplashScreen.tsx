@@ -20,7 +20,7 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center gap-8"
+          className="fixed inset-0 z-[9999] bg-[#FFFFFF] flex flex-col items-center justify-center gap-8"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
