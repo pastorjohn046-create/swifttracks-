@@ -59,6 +59,9 @@ export default function Layout({ children, user, profile }: LayoutProps) {
               {user ? (
                 <>
                   <Link to="/dashboard" className="text-xs font-bold text-muted hover:text-primary transition-colors uppercase tracking-widest">Dashboard</Link>
+                  {(profile?.role === 'admin' || profile?.email === 'admin@example.com') && (
+                    <Link to="/admin" className="text-xs font-bold text-accent hover:opacity-80 transition-opacity uppercase tracking-widest">Admin</Link>
+                  )}
                   <button onClick={handleLogout} className="btn-primary !py-2 !px-6 !text-[10px]">LOGOUT</button>
                 </>
               ) : (
@@ -85,7 +88,13 @@ export default function Layout({ children, user, profile }: LayoutProps) {
                 <Link to="/reviews" onClick={() => setIsMobileMenuOpen(false)}>Client Reviews</Link>
                 <Link to="/track" onClick={() => setIsMobileMenuOpen(false)}>Track Shipment</Link>
                 {user ? (
-                  <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+                  <>
+                    <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+                    {(profile?.role === 'admin' || profile?.email === 'admin@example.com') && (
+                      <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-accent">Admin Panel</Link>
+                    )}
+                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="btn-primary w-full text-center">LOGOUT</button>
+                  </>
                 ) : (
                   <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="btn-primary w-full text-center">GET STARTED</Link>
                 )}

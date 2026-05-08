@@ -37,6 +37,25 @@ function getDb() {
       dbCache = JSON.parse(JSON.stringify(initialDb));
     }
   }
+
+  // Auto-create requested admin if missing
+  const adminEmail = 'admin@example.com';
+  if (dbCache.users && !dbCache.users.find((u: any) => u.email === adminEmail)) {
+    console.log('Auto-creating requested admin user...');
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync('Admin@12345', salt);
+    dbCache.users.push({
+      uid: 'admin-primary',
+      email: adminEmail,
+      password: hash,
+      name: 'System Administrator',
+      role: 'admin',
+      customerID: 'ADM-001',
+      createdAt: new Date().toISOString()
+    });
+    saveDb(dbCache);
+  }
+
   return dbCache;
 }
 

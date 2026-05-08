@@ -27,12 +27,13 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-8 bg-red-50 text-red-900 min-h-screen flex flex-col items-center justify-center">
-          <h1 className="text-4xl font-black mb-4">SYSTEM ERROR.</h1>
-          <pre className="bg-white p-4 border border-red-200 overflow-auto max-h-[50vh] text-xs mb-8">
+        <div className="p-8 bg-red-50 text-red-900 min-h-screen flex flex-col items-center justify-center text-center">
+          <h1 className="text-4xl font-black mb-4 heading-display">SYSTEM FAILURE.</h1>
+          <p className="mb-8 text-red-700 font-medium">The application encountered a critical rendering error.</p>
+          <pre className="bg-white p-6 border border-red-200 overflow-auto max-h-[40vh] text-[10px] text-left mb-8 font-mono">
             {this.state.error?.toString()}
           </pre>
-          <button onClick={() => window.location.reload()} className="btn-primary">RELOAD SYSTEM</button>
+          <button onClick={() => window.location.reload()} className="btn-primary">REBOOT INTERFACE</button>
         </div>
       );
     }
@@ -69,7 +70,10 @@ export default function App() {
     );
   }
 
-  const isAdminAuthenticated = () => profile?.role === 'admin';
+  const isAdminAuthenticated = () => {
+    // Check both server-validated role and the hardcoded fallback for the requested admin
+    return profile?.role === 'admin' || profile?.email === 'admin@example.com';
+  };
 
   return (
     <ErrorBoundary>
@@ -89,13 +93,15 @@ export default function App() {
               element={
                 isAdminAuthenticated() 
                   ? (
-                    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin" /></div>}>
+                    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin text-primary" /></div>}>
                       <AdminPanel />
                     </React.Suspense>
                   )
                   : <Navigate to="/admin/login" />
               } 
             />
+            {/* Catch-all to home */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Layout>
         <SupportButton />
